@@ -24,12 +24,11 @@ static void BC_Worker();	// Worker Process
 static bool BC_WorkerMap();
 static void BC_WorkerReduce();
 
-/*---------------- BSF-Variable Access ----------------------*/
-void BV_AssignAddressOffset(int value);
-void BV_AssignIterCounter(int value);
-void BV_AssignJobCase(int value);
-void BV_AssignMapSubList(PT_bsf_mapElem_T* value);
-void BV_AssignMpiRank(int value);
-void BV_AssignNumberInSublist(int value);
-void BV_AssignNumOfWorkers(int value);
-void BV_AssignSublistLength(int value);
+/*---------------- Access to BSF-skeleton Parameters ----------------------*/
+void PC_bsf_AssignAddressOffset(int value);
+void PC_bsf_AssignIterCounter(int value);
+void PC_bsf_AssignJobCase(int value);
+void PC_bsf_AssignMpiRank(int value);
+void PC_bsf_AssignNumberInSublist(int value);
+void PC_bsf_AssignNumOfWorkers(int value);
+void PC_bsf_AssignSublistLength(int value);

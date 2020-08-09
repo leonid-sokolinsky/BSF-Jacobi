@@ -2,7 +2,7 @@
 Project: Bulk Synchronous Farm (BSF)
 Theme: BSF Skeleton
 Module: BSF-Code.cpp (Problem Independent Code)
-Prefix: BI
+Prefix: BC
 Author: Leonid B. Sokolinsky
 This source code is a part of BSF Skeleton
 ==============================================================================*/
@@ -166,8 +166,8 @@ static void BC_Worker() {// Worker Process
 };
 
 static void BC_MasterMap(bool exit) {
-	BV_AssignJobCase(BD_jobCase);
-	BV_AssignIterCounter(BD_iterCounter);
+	PC_bsf_AssignJobCase(BD_jobCase);
+	PC_bsf_AssignIterCounter(BD_iterCounter);
 
 	for (int rank = 0; rank < BD_numOfWorkers; rank++) {
 		PC_bsf_CopyParameter(&BD_parameter, &(BD_order[rank].parameter));
@@ -240,10 +240,10 @@ static bool BC_WorkerMap() {
 	if (BD_order[BD_rank].exit)
 		return BD_EXIT;
 
-	BV_AssignJobCase(BD_order[BD_rank].jobCase);
-	BV_AssignIterCounter(BD_order[BD_rank].iterCounter);
-	BV_AssignSublistLength(BD_sublistSize[BD_rank]);
-	BV_AssignAddressOffset(BD_offset[BD_rank]);
+	PC_bsf_AssignJobCase(BD_order[BD_rank].jobCase);
+	PC_bsf_AssignIterCounter(BD_order[BD_rank].iterCounter);
+	PC_bsf_AssignSublistLength(BD_sublistSize[BD_rank]);
+	PC_bsf_AssignAddressOffset(BD_offset[BD_rank]);
 	PC_bsf_SetParameter(&BD_order[BD_rank].parameter);
 
 #ifdef PP_BSF_OMP
@@ -260,7 +260,7 @@ static bool BC_WorkerMap() {
 #else
 		mapIndex = index;
 #endif
-		BV_AssignNumberInSublist(mapIndex);
+		PC_bsf_AssignNumberInSublist(mapIndex);
 		switch (BD_order[BD_rank].jobCase) {
 		case 0:
 			BD_extendedReduceList[index].reduceCounter = 1;
@@ -465,8 +465,6 @@ static void BC_Init(bool* success) {// Initialization
 			return;
 		};
 
-		BV_AssignMapSubList(BD_mapSubList);
-
 #ifdef PP_BSF_FRAGMENTED_MAP_LIST
 		PC_bsf_SetMapSubList(BD_mapSubList, BD_sublistSize[BD_rank], BD_offset[BD_rank], success);
 #else
@@ -483,14 +481,14 @@ static void BC_MpiRun() {
 		MPI_Abort(MPI_COMM_WORLD, rc);
 	};
 	MPI_Comm_rank(MPI_COMM_WORLD, &BD_rank);
-	BV_AssignMpiRank(BD_rank);
+	PC_bsf_AssignMpiRank(BD_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &BD_size);
 	if (BD_size > PP_MAX_MPI_SIZE) {
 		if (BD_rank == 0) cout << "Error: MPI_SIZE exceeded the maximum allowed value PP_MAX_MPI_SIZE = " << PP_MAX_MPI_SIZE << endl;
 		MPI_Finalize();
 		exit(1);
 	}
-	BV_AssignNumOfWorkers(BD_size - 1);
+	PC_bsf_AssignNumOfWorkers(BD_size - 1);
 	if (BD_size < 2) {
 		if (BD_rank == 0) cout << "Error: MPI_SIZE must be > 1" << endl;
 		MPI_Finalize();
