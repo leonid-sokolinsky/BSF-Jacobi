@@ -3,15 +3,26 @@ Project: Bulk Synchronous Farm (BSF)
 Theme: BSF Skeleton
 Module: BSF-Forwards.h (Problem Independent Function Forwards)
 Author: Leonid B. Sokolinsky 
-This source code is a part of BSF Skeleton
+This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky/BSF-skeleton)
 ==============================================================================*/
 #include "BSF-Types.h"					// Problem Independent Types 
 
-static void	BC_Init(bool* success);		// BSF Initialization
-static void BC_Master();				// Master Process
-static void BC_MasterMap(bool exit);
-static void BC_MasterReduce();
-static void BC_MpiRun();
+/*---------------- Assigning Values to BSF Problem Variables ----------------------*/
+void PC_bsfAssignAddressOffset(int value);
+void PC_bsfAssignIterCounter(int value);
+void PC_bsfAssignJobCase(int value);
+void PC_bsfAssignMpiRank(int value);
+void PC_bsfAssignNumberInSublist(int value);
+void PC_bsfAssignNumOfWorkers(int value);
+void PC_bsfAssignParameter(PT_bsf_parameter_T parameter);
+void PC_bsfAssignSublistLength(int value);
+
+/*---------------- BSF Skeleton Functions ----------------------*/
+static void	BC_Init(bool* success);		// Performs the memory allocation and the initialization of the skeleton data structures and variables.
+static void BC_Master();				// The head function of the master process.
+static void BC_MasterMap(bool exit);	// Forms an order and sends it to the worker processes to perform the Map function in the current iteration.
+static void BC_MasterReduce();			// Receives the results from worker processes, collects them in a list, and performs the function Reduce on this list.
+static void BC_MpiRun();				// MPI initialization.
 static void BC_ProcessExtendedReduceList(BT_extendedReduceElem_T* reduceList, int index, int length,
 	BT_extendedReduceElem_T** extendedReduceResult_P);
 static void BC_ProcessExtendedReduceList_1(BT_extendedReduceElem_T_1* reduceList, int index, int length,
@@ -20,15 +31,6 @@ static void BC_ProcessExtendedReduceList_2(BT_extendedReduceElem_T_2* reduceList
 	BT_extendedReduceElem_T_2** extendedReduceResult_P);
 static void BC_ProcessExtendedReduceList_3(BT_extendedReduceElem_T_3* reduceList, int index, int length,
 	BT_extendedReduceElem_T_3** extendedReduceResult_P);
-static void BC_Worker();	// Worker Process
-static bool BC_WorkerMap();
-static void BC_WorkerReduce();
-
-/*---------------- Access to BSF-skeleton Parameters ----------------------*/
-void PC_bsf_AssignAddressOffset(int value);
-void PC_bsf_AssignIterCounter(int value);
-void PC_bsf_AssignJobCase(int value);
-void PC_bsf_AssignMpiRank(int value);
-void PC_bsf_AssignNumberInSublist(int value);
-void PC_bsf_AssignNumOfWorkers(int value);
-void PC_bsf_AssignSublistLength(int value);
+static void BC_Worker();				// The head function of a worker process.
+static bool BC_WorkerMap();				// Performs the Map function.
+static void BC_WorkerReduce();			// Sends to the master process the element that is the sum of all reduce-sublist elements.

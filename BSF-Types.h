@@ -4,7 +4,7 @@ Theme: BSF Skeleton
 Module: BSF-Types.h (Problem Independent Types)
 Prefix: BT
 Author: Leonid B. Sokolinsky 
-This source code is a part of BSF Skeleton
+This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky/BSF-skeleton)
 ==============================================================================*/
 #pragma once
 #include "Problem-bsfTypes.h"	// Predefined BSF Problem Types
