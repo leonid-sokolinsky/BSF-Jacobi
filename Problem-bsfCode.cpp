@@ -12,96 +12,119 @@ This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky
 using namespace std;
 
 //----------------------- Predefined problem-dependent functions -----------------
-void PC_bsf_Init(bool* success) { // success=false if initialization is unsuccessful
+void PC_bsf_Init(bool* success) { 
+	for (int i = 0; i < PP_N; i++) { // Generating Matrix A
+		for (int j = 0; j < i; j++)
+			PD_A[i][j] = 1;
+		PD_A[i][i] = i * 2;
+		for (int j = i + 1; j < PP_N; j++)
+			PD_A[i][j] = 0;
+	};
+	PD_A[0][0] = 1;
 
+	for (int i = 0; i < PP_N; i++) // Generating Vector of right parts
+		PD_b[i] = i + 2 * i;
+	PD_b[0] = 1;
+
+	for (int i = 0; i < PP_N; i++) { // Clculating reduced matrix Alpha
+		for (int j = 0; j < PP_N; j++)
+			PD_Alpha[i][j] = -PD_A[i][j] / PD_A[i][i];
+		PD_Alpha[i][i] = 0;
+	};
+
+	for (int i = 0; i < PP_N; i++) // Clculating reduced vector beta
+		PD_beta[i] = PD_b[i] / PD_A[i][i];
 }; 
 
-void PC_bsf_SetListSize(int* listSize) { // Sets the length of the list.
-
+void PC_bsf_SetListSize(int* listSize) { 
+	*listSize = PP_N;
 };
 
 void PC_bsf_CopyParameter(PT_bsf_parameter_T parameterIn, PT_bsf_parameter_T* parameterOutP) {
-
+	for (int i = 0; i < PP_N; i++)
+		parameterOutP->x[i] = parameterIn.x[i];
 };
 
-void PC_bsf_MapF(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T* reduceElem,
-	int* success // 1 - reduceElem was produced successfully (default); 0 - otherwise
-) {
-
+void PC_bsf_MapF(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T* reduceElem, int* success) {
+	for (int i = 0; i < PP_N; i++)
+		reduceElem->column[i] = PD_Alpha[i][mapElem->columnNo] * BSF_sv_parameter.x[mapElem->columnNo];
 };
 
-void PC_bsf_MapF_1(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T_1* reduceElem,
-	int* success // 1 - reduceElem was produced successfully (default); 0 - otherwise
-) {
-	// optional filling
+void PC_bsf_MapF_1(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T_1* reduceElem, int* success) {
+	// Optional filling. Do not delete!
 };
 
-void PC_bsf_MapF_2(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T_2* reduceElem,
-	int* success // 1 - reduceElem was produced successfully (default); 0 - otherwise
-	) {
-	// optional filling
+void PC_bsf_MapF_2(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T_2* reduceElem, int* success) {
+	// Optional filling. Do not delete!
 };
 
-void PC_bsf_MapF_3(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T_3* reduceElem,
-	int* success // 1 - reduceElem was produced successfully (default); 0 - otherwise
-	) {
-	// optional filling
+void PC_bsf_MapF_3(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T_3* reduceElem, int* success) {
+	// Optional filling. Do not delete!
 };
 
-void PC_bsf_ReduceF(PT_bsf_reduceElem_T* x, PT_bsf_reduceElem_T* y, PT_bsf_reduceElem_T* z) { // z = x + y
-
+void PC_bsf_ReduceF(PT_bsf_reduceElem_T* x, PT_bsf_reduceElem_T* y, PT_bsf_reduceElem_T* z) { // z = x (+) y
+	for (int i = 0; i < PP_N; i++)
+		z->column[i] = x->column[i] + y->column[i];
 };
 
 void PC_bsf_ReduceF_1(PT_bsf_reduceElem_T_1* x, PT_bsf_reduceElem_T_1* y, PT_bsf_reduceElem_T_1* z) {
-	// optional filling
+	// Optional filling. Do not delete!
 };
 
 void PC_bsf_ReduceF_2(PT_bsf_reduceElem_T_2* x, PT_bsf_reduceElem_T_2* y, PT_bsf_reduceElem_T_2* z) {
-	// optional filling
+	// Optional filling. Do not delete!
 };
 
 void PC_bsf_ReduceF_3(PT_bsf_reduceElem_T_3* x, PT_bsf_reduceElem_T_3* y, PT_bsf_reduceElem_T_3* z) {
-	// optional filling
+	// Optional filling. Do not delete!
 };
 
 void PC_bsf_ProcessResults(
 	PT_bsf_reduceElem_T* reduceResult,
-	int reduceCounter, // Number of successfully produced Elrments of Reduce List
-	PT_bsf_parameter_T* parameter, // Current Approximation
+	int reduceCounter, 
+	PT_bsf_parameter_T* parameter, 
 	int* newJobCas,
-	bool* exit // "true" if Stopping Criterion is satisfied, and "false" otherwise
+	bool* exit 
 ) {
+	for (int j = 0; j < PP_N; j++) {
+		PD_prev_x[j] = parameter->x[j];
+		parameter->x[j] = reduceResult->column[j] + PD_beta[j];
+	};
 
+	if (StopCond(parameter))
+		*exit = true;
+	else
+		*exit = false;
 };
 
 void PC_bsf_ProcessResults_1(
 	PT_bsf_reduceElem_T_1* reduceResult,
-	int reduceCounter, // Number of successfully produced Elrments of Reduce List
-	PT_bsf_parameter_T* parameter, // Current Approximation
+	int reduceCounter, 
+	PT_bsf_parameter_T* parameter, 
 	int* nextJob,
-	bool* exit // "true" if Stopping Criterion is satisfied, and "false" otherwise
+	bool* exit 
 ) {
-	// optional filling
+	// Optional filling. Do not delete!
 };
 
 void PC_bsf_ProcessResults_2(
 	PT_bsf_reduceElem_T_2* reduceResult,
-	int reduceCounter, // Number of successfully produced Elrments of Reduce List
-	PT_bsf_parameter_T* parameter, // Current Approximation
+	int reduceCounter, 
+	PT_bsf_parameter_T* parameter, 
 	int* nextJob,
-	bool* exit // "true" if Stopping Criterion is satisfied, and "false" otherwise
+	bool* exit 
 	) {
-	// optional filling
+	// Optional filling. Do not delete!
 };
 
 void PC_bsf_ProcessResults_3(
 	PT_bsf_reduceElem_T_3* reduceResult,
-	int reduceCounter, // Number of successfully produced Elrments of Reduce List
-	PT_bsf_parameter_T* parameter, // Current Approximation
+	int reduceCounter, 
+	PT_bsf_parameter_T* parameter, 
 	int* nextJob,
-	bool* exit // "true" if Stopping Criterion is satisfied, and "false" otherwise
+	bool* exit 
 	) {
-	// optional filling
+	// Optional filling. Do not delete!
 };
 
 void PC_bsf_ParametersOutput(PT_bsf_parameter_T parameter) {
@@ -117,64 +140,89 @@ void PC_bsf_ParametersOutput(PT_bsf_parameter_T parameter) {
 	cout << "OpenMP is turned off!" << endl;
 #endif // PP_BSF_OMP
 
-};
+	cout << "Dimension: N = " << PP_N << endl;
+	cout << "Eps_Square = " << PP_EPS << endl;
+#ifdef PP_MATRIX_OUTPUT
+	cout << "------- Matrix A & Column b -------" << endl;
+	for (int i = 0; i < PP_N; i++) {
+		for (int j = 0; j < PP_N; j++)
+			cout << setw(7) << PD_A[i][j];
+		cout << setw(7) << PD_b[i] << endl;
+	};
+	cout << endl;
+	cout << "------- Matrix Alpha & Column Beta -------" << endl;
+	for (int i = 0; i < PP_N; i++) {
+		for (int j = 0; j < PP_N; j++)
+			cout << setw(7) << PD_Alpha[i][j];
+		cout << setw(7) << PD_beta[i] << endl;
+	};
+	cout << endl;
+#endif // PP_MATRIX_OUTPUT
+	cout << "Initial x: "; for (int j = 0; j < PF_MIN(PP_OUTPUT_LIMIT, PP_N); j++) cout << setw(7) << parameter.x[j]; cout << (PP_OUTPUT_LIMIT < PP_N ? "..." : "") << endl;
+	cout << "-------------------------------------------" << endl;
+}
 
 void PC_bsf_IterOutput(PT_bsf_reduceElem_T* reduceResult, int reduceCounter, PT_bsf_parameter_T parameter,
 	double elapsedTime, int jobCase) {
 	cout << "------------------ " << BSF_sv_iterCounter << " ------------------" << endl;
-
-
-};
+	cout << "Approximation:\t\t"; for (int j = 0; j < PF_MIN(PP_OUTPUT_LIMIT, PP_N); j++) cout << setw(12) << parameter.x[j]; 
+	cout << (PP_OUTPUT_LIMIT < PP_N ? "..." : "") << endl;/**/
+}
 
 void PC_bsf_IterOutput_1(PT_bsf_reduceElem_T_1* reduceResult, int reduceCounter, PT_bsf_parameter_T parameter,
 	double elapsedTime, int jobCase) {
 	cout << "------------------ " << BSF_sv_iterCounter << " ------------------" << endl;
-	// optional filling
+	// Optional filling. Do not delete!
 
-};
+}
 
 void PC_bsf_IterOutput_2(PT_bsf_reduceElem_T_2* reduceResult, int reduceCounter, PT_bsf_parameter_T parameter,
 	double elapsedTime, int jobCase) {
 	cout << "------------------ " << BSF_sv_iterCounter << " ------------------" << endl;
-	// optional filling
+	// Optional filling. Do not delete!
 
-};
+}
 
 void PC_bsf_IterOutput_3(PT_bsf_reduceElem_T_3* reduceResult, int reduceCounter, PT_bsf_parameter_T parameter,
 	double elapsedTime, int jobCase) {
 	cout << "------------------ " << BSF_sv_iterCounter << " ------------------" << endl;
-	// optional filling
+	// Optional filling. Do not delete!
 
-};
+}
 
 void PC_bsf_ProblemOutput(PT_bsf_reduceElem_T* reduceResult, int reduceCounter, PT_bsf_parameter_T parameter,
-	double t) {// Output Function
-
-};
+	double t) {
+	cout << "=============================================" << endl;
+	cout << "Time: " << t << endl;
+	cout << "Iterations: " << BSF_sv_iterCounter << endl;
+	cout << "Solution: "; for (int j = 0; j < PF_MIN(PP_OUTPUT_LIMIT, PP_N); j++) cout << setw(12) << parameter.x[j]; 
+	cout << (PP_OUTPUT_LIMIT < PP_N ? "..." : "") << endl;
+}
 
 void PC_bsf_ProblemOutput_1(PT_bsf_reduceElem_T_1* reduceResult, int reduceCounter, PT_bsf_parameter_T parameter,
-	double t) {// Output Function
-	// optional filling
-};
+	double t) {
+	// Optional filling. Do not delete!
+}
 
 void PC_bsf_ProblemOutput_2(PT_bsf_reduceElem_T_2* reduceResult, int reduceCounter, PT_bsf_parameter_T parameter,
-	double t) {// Output Function
-	// optional filling
+	double t) {
+	// Optional filling. Do not delete!
 };
 
 void PC_bsf_ProblemOutput_3(PT_bsf_reduceElem_T_3* reduceResult, int reduceCounter, PT_bsf_parameter_T parameter,
-	double t) {// Output Function
-	// optional filling
-};
+	double t) {
+	// Optional filling. Do not delete!
+}
 
 void PC_bsf_SetInitParameter(PT_bsf_parameter_T* parameter) {
-
-};
+	for (int i = 0; i < PP_N; i++) // Generating coordinates of initial appriximation
+		parameter->x[i] = PD_beta[i];
+}
 
 void PC_bsf_SetMapSubList(PT_bsf_mapElem_T* sublist, int sublistLength, int offset) {
-
-
-};
+	for (int i = 0; i < sublistLength; i++)
+		sublist[i].columnNo = i + offset;
+}
 
 //----------------------- Assigning Values to BSF-skeleton Variables (Do not modify!) -----------------------
 void PC_bsfAssignAddressOffset(int value) { BSF_sv_addressOffset = value; }
@@ -187,3 +235,28 @@ void PC_bsfAssignParameter(PT_bsf_parameter_T parameter) { PC_bsf_CopyParameter(
 void PC_bsfAssignSublistLength(int value) { BSF_sv_sublistLength = value; }
 
 //----------------------------- User functions -----------------------------
+static bool StopCond(PT_bsf_parameter_T* parameter) {// Calculates the stop condition
+	PT_point_T difference; // Difference between current and previous approximations
+
+#ifdef PP_MAX_ITER_COUNT
+	if (BSF_sv_iterCounter > PP_MAX_ITER_COUNT) {
+		cout << "Acceptable maximum number of iterations is exceeded: PP_MAX_ITER_COUNT = " << PP_MAX_ITER_COUNT << endl;
+		return true;
+	};
+#endif // PP_MAX_ITER_COUNT
+
+	for (int j = 0; j < PP_N; j++)
+		difference[j] = PD_prev_x[j] - parameter->x[j];
+	if (Norm(difference) < PP_EPS)
+		return true;
+	else
+		return false;
+}
+
+static double Norm(PT_point_T x) {// Calculates the square of the vector norm
+	double sum = 0;
+	for (int j = 0; j < PP_N; j++)
+		sum += x[j] * x[j];
+	return sqrt(sum);
+}
+

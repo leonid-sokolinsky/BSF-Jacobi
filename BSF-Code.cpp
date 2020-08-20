@@ -170,6 +170,7 @@ static void BC_MasterMap(bool exit) { // Forms an order and sends it to the work
 	BD_order.exit = exit;
 	BD_order.jobCase = BD_jobCase;
 	BD_order.iterCounter = BD_iterCounter;
+
 	for (int rank = 0; rank < BD_numOfWorkers; rank++) {
 		MPI_Isend(
 			&BD_order,

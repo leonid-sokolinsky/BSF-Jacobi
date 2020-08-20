@@ -10,16 +10,14 @@ This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky
 #include "Problem-Types.h"		// Problem Types 
 
 //=========================== BSF Types =========================
-struct PT_bsf_parameter_T {			// Parameter for workers
-
+struct PT_bsf_parameter_T {			
+	PT_point_T x;	// Current approximation
 };
-
-struct PT_bsf_mapElem_T {			// Element of map list
-
+struct PT_bsf_mapElem_T {		
+	int columnNo;				// Column number in matrix Alpha
 };
-
-struct PT_bsf_reduceElem_T {		// Element of reduce list	
-
+struct PT_bsf_reduceElem_T {		
+	double column[PP_N];		// Column of intermediate matrix		
 };
 
 struct PT_bsf_reduceElem_T_1 {				
