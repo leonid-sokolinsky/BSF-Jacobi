@@ -164,11 +164,13 @@ static void BC_Worker() {// The head function of a worker process.
 };
 
 static void BC_MasterMap(bool exit) { // Forms an order and sends it to the worker processes to perform the Map function in the current iteration.
+	PC_bsfAssignJobCase(BD_jobCase);
+	PC_bsfAssignIterCounter(BD_iterCounter);
 
+	BD_order.exit = exit;
+	BD_order.jobCase = BD_jobCase;
+	BD_order.iterCounter = BD_iterCounter;
 	for (int rank = 0; rank < BD_numOfWorkers; rank++) {
-		BD_order.exit = exit;
-		BD_order.jobCase = BD_jobCase;
-		BD_order.iterCounter = BD_iterCounter;
 		MPI_Isend(
 			&BD_order,
 			sizeof(BT_order_T),
