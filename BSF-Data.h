@@ -8,7 +8,7 @@ This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky
 ==============================================================================*/
 #include "BSF-Include.h"			// Problem Independent "Include" Files
 #include "BSF-Types.h"				// Problem Independent Types
-#include "Problem-bsfParameters.h"	// Predefined Problem Parameters
+#include "Problem-bsfParameters.h"	// BSF-skeleton parameters
 // ========================= Constants ========================
 #define BD_EXIT	true			// End of Work
 // ========================= Variables ========================
