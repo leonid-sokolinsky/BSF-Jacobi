@@ -1,6 +1,6 @@
 /*==============================================================================
 Project: Bulk Synchronous Farm (BSF)
-Theme: BSF Skeleton
+Theme: BSF Cimmino
 Module: BSF-ProblemFunctions.h (Predefined Problem Function Forwards)
 Author: Leonid B. Sokolinsky
 This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky/BSF-skeleton)
@@ -143,8 +143,8 @@ void PC_bsf_SetListSize(
 void PC_bsf_SetInitParameter(
 	PT_bsf_parameter_T* parameter
 );
-void PC_bsf_SetMapSubList(
-	PT_bsf_mapElem_T* sublist, 
-	int sublistLength, 
-	int offset
+
+void PC_bsf_SetMapListElem(
+	PT_bsf_mapElem_T* elem, 
+	int i
 );

@@ -1,7 +1,7 @@
 /*==============================================================================
 Project: Bulk Synchronous Farm (BSF)
 Theme: BSF Skeleton
-Module: Problem-bsfCode.cpp (Problem-dependent Code)
+Module: Problem-bsfCode.h (Problem-dependent Code)
 Prefix: PC
 Author: Leonid B. Sokolinsky
 This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky/BSF-skeleton)
@@ -129,7 +129,7 @@ void PC_bsf_ProcessResults_3(
 };
 
 void PC_bsf_ParametersOutput(PT_bsf_parameter_T parameter) {
-	cout << "=================================================== Jacobi M ====================================================" << endl;
+	cout << "=================================================== Jacobi MR ====================================================" << endl;
 	cout << "Number of Workers: " << BSF_sv_numOfWorkers << endl;
 #ifdef PP_BSF_OMP
 #ifdef PP_BSF_NUM_THREADS
@@ -220,9 +220,8 @@ void PC_bsf_SetInitParameter(PT_bsf_parameter_T* parameter) {
 		parameter->x[i] = PD_beta[i];
 }
 
-void PC_bsf_SetMapSubList(PT_bsf_mapElem_T* sublist, int sublistLength, int offset) {
-	for (int i = 0; i < sublistLength; i++)
-		sublist[i].columnNo = i + offset;
+void PC_bsf_SetMapListElem(PT_bsf_mapElem_T* elem, int i) {
+	elem->columnNo = i;
 }
 
 //----------------------- Assigning Values to BSF-skeleton Variables (Do not modify!) -----------------------
@@ -237,7 +236,7 @@ void PC_bsfAssignSublistLength(int value) { BSF_sv_sublistLength = value; }
 
 //----------------------------- User functions -----------------------------
 static bool StopCond(PT_bsf_parameter_T* parameter) {// Calculates the stop condition
-	PT_point_T difference; // Difference between current and previous approximations
+	PT_vector_T difference; // Difference between current and previous approximations
 
 #ifdef PP_MAX_ITER_COUNT
 	if (BSF_sv_iterCounter > PP_MAX_ITER_COUNT) {
@@ -254,7 +253,7 @@ static bool StopCond(PT_bsf_parameter_T* parameter) {// Calculates the stop cond
 		return false;
 }
 
-static double Norm(PT_point_T x) {// Calculates the square of the vector norm
+static double Norm(PT_vector_T x) {// Calculates the square of the vector norm
 	double sum = 0;
 	for (int j = 0; j < PP_N; j++)
 		sum += x[j] * x[j];

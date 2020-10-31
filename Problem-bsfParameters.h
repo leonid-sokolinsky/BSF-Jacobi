@@ -18,4 +18,4 @@ This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky
 									// Otherwise, the map-list is replicated on each worker-node. 
 //--------------------------- OpenMP Parameters ---------------------------
 //#define PP_BSF_OMP				// If PP_BSF_OMP is defined then OpenMP is turned on for Map Step
-//#define PP_BSF_NUM_THREADS 2		// If PP_BSF_NUM_THREADS is udefined then all accessable threads are used
+#define PP_BSF_NUM_THREADS 2		// If PP_BSF_NUM_THREADS is udefined then all accessable threads are used

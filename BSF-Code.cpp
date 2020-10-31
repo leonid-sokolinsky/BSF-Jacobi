@@ -1,6 +1,6 @@
 /*==============================================================================
 Project: Bulk Synchronous Farm (BSF)
-Theme: BSF Skeleton
+Theme: BSF Cimmino
 Module: BSF-Code.cpp (Problem Independent Code)
 Prefix: BC
 Author: Leonid B. Sokolinsky
@@ -10,7 +10,7 @@ This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky
 #include "BSF-Forwards.h"			// Problem Independent Function Forwards
 #include "BSF-ProblemFunctions.h"	// Predefined Problem Function Forwards
 using namespace std;
-
+//======================================== Problem-independent codes (don't modify them) ====================================
 int main(int argc, char* argv[]) {
 	char emptystring[] = "";
 	char* message = emptystring;
@@ -52,6 +52,7 @@ static void BC_Master() {// The head function of the master process.
 
 	BD_t -= MPI_Wtime();
 	do {
+		/* Time measurement *///cout << endl;
 		BD_jobCase = BD_newJobCase;
 		if (BD_jobCase > PP_BSF_MAX_JOB_CASE) {
 			cout << "BC_Master:Error: Job Case = " << BD_jobCase << " > PP_BSF_MAX_JOB_CASE = " << PP_BSF_MAX_JOB_CASE << endl;
@@ -60,6 +61,7 @@ static void BC_Master() {// The head function of the master process.
 		};
 		BC_MasterMap(!BD_EXIT);
 		BC_MasterReduce();
+		/* Time measurement *///double t_p = -MPI_Wtime();
 		switch (BD_jobCase) {
 			case 0:
 			PC_bsf_ProcessResults(
@@ -129,6 +131,10 @@ static void BC_Master() {// The head function of the master process.
 			cout << "BC_Master: Undefined job type!" << endl;
 			break;
 		};
+
+		/* Time measurement *///t_p += MPI_Wtime();
+		/* Time measurement *///cout << "t_p = " << t_p << "\t";
+
 		BD_iterCounter++;
 	} while (!BD_exit);
 	BD_t += MPI_Wtime();
@@ -171,6 +177,7 @@ static void BC_MasterMap(bool exit) { // Forms an order and sends it to the work
 	BD_order.jobCase = BD_jobCase;
 	BD_order.iterCounter = BD_iterCounter;
 
+	/* Time measurement *///double t_Send = -MPI_Wtime(), t_s;
 	for (int rank = 0; rank < BD_numOfWorkers; rank++) {
 		MPI_Isend(
 			&BD_order,
@@ -182,9 +189,14 @@ static void BC_MasterMap(bool exit) { // Forms an order and sends it to the work
 			&BD_request[rank]);
 	};
 	MPI_Waitall(BD_numOfWorkers, BD_request, BD_status);
+
+	/* Time measurement *///t_Send += MPI_Wtime();
+	/* Time measurement *///t_s = t_Send / BD_numOfWorkers;
+	/* Time measurement *///cout << "t_s = " << t_s << "\t";
 };
 
 static void BC_MasterReduce() {
+
 	for (int rank = 0; rank < BD_numOfWorkers; rank++)
 		switch (BD_jobCase) {
 		case 0:
@@ -203,7 +215,6 @@ static void BC_MasterReduce() {
 			cout << "BC_MasterReduce Error: Undefined job type!" << endl;
 			break;
 		};
-
 	MPI_Waitall(BD_numOfWorkers, BD_request, BD_status);
 
 	switch (BD_jobCase) {
@@ -244,6 +255,7 @@ static bool BC_WorkerMap() { // Performs the Map function
 	PC_bsfAssignAddressOffset(BD_offset[BD_rank]);
 	PC_bsfAssignParameter(BD_order.parameter);
 
+	/* Time measurement *///double t_Map = -MPI_Wtime();
 #ifdef PP_BSF_OMP
 #ifdef PP_BSF_NUM_THREADS
 #pragma omp parallel for num_threads(PP_BSF_NUM_THREADS)
@@ -285,10 +297,14 @@ static bool BC_WorkerMap() { // Performs the Map function
 			break;
 		};
 	};
+	/* Time measurement *///t_Map += MPI_Wtime();
+	/* Time measurement *///cout << "t_Map = " << t_Map << "\t";
 	return !BD_EXIT;
 };
 
 static void BC_WorkerReduce() {
+	/* Time measurement *///double t_Reduce = -MPI_Wtime(), t_a;
+
 	switch (BD_order.jobCase) {
 	case 0:
 		BC_ProcessExtendedReduceList(BD_extendedReduceList, BD_offset[BD_rank], BD_sublistSize[BD_rank],
@@ -314,6 +330,9 @@ static void BC_WorkerReduce() {
 		cout << "BC_WorkerReduce Error: Undefined job type!" << endl;
 		break;
 	};
+	/* Time measurement *///t_Reduce += MPI_Wtime();
+	/* Time measurement *///t_a = t_Reduce / BD_sublistSize[BD_rank];
+	/* Time measurement *///cout << "t_a = " << t_a << "\t";
 };
 
 static void BC_ProcessExtendedReduceList(BT_extendedReduceElem_T* reduceList, int index, int length,
@@ -461,15 +480,20 @@ static void BC_Init(bool* success) {// Performs the memory allocation and the in
 		if (BD_mapSubList == NULL) {
 			*success = false;
 			return;
-		};
+		}
 
+		int first, last;
 #ifdef PP_BSF_FRAGMENTED_MAP_LIST
-		PC_bsf_SetMapSubList(BD_mapSubList, BD_sublistSize[BD_rank], BD_offset[BD_rank]);
+		first = BD_offset[BD_rank];
+		last = BD_offset[BD_rank] + BD_sublistSize[BD_rank] - 1;
 #else
-		PC_bsf_SetMapSubList(BD_mapSubList, BD_listSize, 0);
+		first = 0;
+		last = BD_listSize - 1;
 #endif
-	};
-};
+		for (int i = first; i <= last; i++)
+			PC_bsf_SetMapListElem(&BD_mapSubList[i - first], i);
+	}
+}
 
 static void BC_MpiRun() {
 	int rc;
