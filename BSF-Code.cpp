@@ -473,9 +473,9 @@ static void BC_Init(bool* success) {// Performs the memory allocation and the in
 	};
 	if (BD_rank != BD_masterRank) {
 #ifdef PP_BSF_FRAGMENTED_MAP_LIST
-		BD_mapSubList = (PT_bsf_mapElem_T*)calloc(BD_sublistSize[BD_rank], sizeof(PT_bsf_mapElem_T*));
+		BD_mapSubList = (PT_bsf_mapElem_T*)calloc(BD_sublistSize[BD_rank], sizeof(PT_bsf_mapElem_T));
 #else
-		BD_mapSubList = (PT_bsf_mapElem_T*)calloc(BD_listSize, sizeof(PT_bsf_mapElem_T*));
+		BD_mapSubList = (PT_bsf_mapElem_T*)calloc(BD_listSize, sizeof(PT_bsf_mapElem_T));
 #endif
 		if (BD_mapSubList == NULL) {
 			*success = false;
