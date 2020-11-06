@@ -1,6 +1,6 @@
 /*==============================================================================
 Project: Bulk Synchronous Farm (BSF)
-Theme: BSF Skeleton
+Theme: BSF Cimmino
 Module: BSF-Forwards.h (Problem Independent Function Forwards)
 Author: Leonid B. Sokolinsky 
 This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky/BSF-skeleton)
@@ -23,14 +23,10 @@ static void BC_Master();				// The head function of the master process.
 static void BC_MasterMap(bool exit);	// Forms an order and sends it to the worker processes to perform the Map function in the current iteration.
 static void BC_MasterReduce();			// Receives the results from worker processes, collects them in a list, and performs the function Reduce on this list.
 static void BC_MpiRun();				// MPI initialization.
-static void BC_ProcessExtendedReduceList(BT_extendedReduceElem_T* reduceList, int index, int length,
-	BT_extendedReduceElem_T** extendedReduceResult_P);
-static void BC_ProcessExtendedReduceList_1(BT_extendedReduceElem_T_1* reduceList, int index, int length,
-	BT_extendedReduceElem_T_1** extendedReduceResult_P);
-static void BC_ProcessExtendedReduceList_2(BT_extendedReduceElem_T_2* reduceList, int index, int length,
-	BT_extendedReduceElem_T_2** extendedReduceResult_P);
-static void BC_ProcessExtendedReduceList_3(BT_extendedReduceElem_T_3* reduceList, int index, int length,
-	BT_extendedReduceElem_T_3** extendedReduceResult_P);
+static void BC_ProcessExtendedReduceList(BT_extendedReduceElem_T* reduceList, int length, BT_extendedReduceElem_T** extendedReduceResult_P);
+static void BC_ProcessExtendedReduceList_1(BT_extendedReduceElem_T_1* reduceList, int length, BT_extendedReduceElem_T_1** extendedReduceResult_P);
+static void BC_ProcessExtendedReduceList_2(BT_extendedReduceElem_T_2* reduceList, int length, BT_extendedReduceElem_T_2** extendedReduceResult_P);
+static void BC_ProcessExtendedReduceList_3(BT_extendedReduceElem_T_3* reduceList, int length, BT_extendedReduceElem_T_3** extendedReduceResult_P);
 static void BC_Worker();				// The head function of a worker process.
 static bool BC_WorkerMap();				// Performs the Map function.
 static void BC_WorkerReduce();			// Sends to the master process the element that is the sum of all reduce-sublist elements.
