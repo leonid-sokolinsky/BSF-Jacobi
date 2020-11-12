@@ -14,28 +14,7 @@ using namespace std;
 
 //----------------------- Predefined problem-dependent functions -----------------
 void PC_bsf_Init(bool* success) { 
-	for (int i = 0; i < PP_N; i++) { // Generating Matrix A
-		for (int j = 0; j < i; j++)
-			PD_A[i][j] = 1;
-		PD_A[i][i] = i * 2;
-		for (int j = i + 1; j < PP_N; j++)
-			PD_A[i][j] = 0;
-	};
-	PD_A[0][0] = 1;
-
-	for (int i = 0; i < PP_N; i++) // Generating Vector of right parts
-		PD_b[i] = i + 2 * i;
-	PD_b[0] = 1;
-
-	for (int i = 0; i < PP_N; i++) { // Clculating reduced matrix Alpha
-		for (int j = 0; j < PP_N; j++)
-			PD_Alpha[i][j] = -PD_A[i][j] / PD_A[i][i];
-		PD_Alpha[i][i] = 0;
-	};
-
-	for (int i = 0; i < PP_N; i++) // Clculating reduced vector beta
-		PD_beta[i] = PD_b[i] / PD_A[i][i];
-}; 
+};
 
 void PC_bsf_SetListSize(int* listSize) { 
 	*listSize = PP_N;
@@ -47,8 +26,9 @@ void PC_bsf_CopyParameter(PT_bsf_parameter_T parameterIn, PT_bsf_parameter_T* pa
 };
 
 void PC_bsf_MapF(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T* reduceElem, int* success) {
+
 	for (int i = 0; i < PP_N; i++)
-		reduceElem->column[i] = PD_Alpha[i][mapElem->columnNo] * BSF_sv_parameter.x[mapElem->columnNo];
+		reduceElem->column[i] = mapElem->column[i] * BSF_sv_parameter.x[mapElem->columnNo];
 };
 
 void PC_bsf_MapF_1(PT_bsf_mapElem_T* mapElem, PT_bsf_reduceElem_T_1* reduceElem, int* success) {
@@ -89,7 +69,7 @@ void PC_bsf_ProcessResults(
 ) {
 	for (int j = 0; j < PP_N; j++) {
 		PD_prev_x[j] = parameter->x[j];
-		parameter->x[j] = reduceResult->column[j] + PD_beta[j];
+		parameter->x[j] = reduceResult->column[j] + beta(j);
 	};
 
 	if (StopCond(parameter))
@@ -147,15 +127,15 @@ void PC_bsf_ParametersOutput(PT_bsf_parameter_T parameter) {
 	cout << "------- Matrix A & Column b -------" << endl;
 	for (int i = 0; i < PP_N; i++) {
 		for (int j = 0; j < PP_N; j++)
-			cout << setw(7) << PD_A[i][j];
-		cout << setw(7) << PD_b[i] << endl;
+			cout << setw(7) << A(i,j);
+		cout << setw(7) << b(i) << endl;
 	};
 	cout << endl;
 	cout << "------- Matrix Alpha & Column Beta -------" << endl;
 	for (int i = 0; i < PP_N; i++) {
 		for (int j = 0; j < PP_N; j++)
-			cout << setw(7) << PD_Alpha[i][j];
-		cout << setw(7) << PD_beta[i] << endl;
+			cout << setw(9) << Alpha(i,j);
+		cout << setw(9) << beta(i) << endl;
 	};
 	cout << endl;
 #endif // PP_MATRIX_OUTPUT
@@ -217,11 +197,14 @@ void PC_bsf_ProblemOutput_3(PT_bsf_reduceElem_T_3* reduceResult, int reduceCount
 
 void PC_bsf_SetInitParameter(PT_bsf_parameter_T* parameter) {
 	for (int i = 0; i < PP_N; i++) // Generating coordinates of initial appriximation
-		parameter->x[i] = PD_beta[i];
+		parameter->x[i] = beta(i);
 }
 
-void PC_bsf_SetMapListElem(PT_bsf_mapElem_T* elem, int i) {
-	elem->columnNo = i;
+void PC_bsf_SetMapListElem(PT_bsf_mapElem_T* elem, int j) {
+	elem->columnNo = j;
+
+	for (int i = 0; i < PP_N; i++)
+		elem->column[i] = Alpha(i, j);
 }
 
 //----------------------- Assigning Values to BSF-skeleton Variables (Do not modify!) -----------------------
@@ -260,3 +243,23 @@ static double Norm(PT_vector_T x) {// Calculates the square of the vector norm
 	return sqrt(sum);
 }
 
+inline PT_float_T A(int i, int j) {
+	if (j > i) return 0;
+	if (j < i) return 1;
+	if (j == 0) return 1;
+	return 2 * i;
+}
+
+inline PT_float_T b(int i) {
+	if (i == 0) return 1;
+	return i + 2 * i;
+}
+
+inline PT_float_T Alpha(int i, int j) { // Reduced matrix Alpha
+	if (j == i) return 0;
+	return -A(i, j) / A(i, i);
+}
+
+inline PT_float_T beta(int i) { // Reduced colunm beta
+	return b(i) / A(i, i);
+}

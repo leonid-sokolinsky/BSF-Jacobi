@@ -11,13 +11,14 @@ This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky
 
 //=========================== BSF Types =========================
 struct PT_bsf_parameter_T {			
-	PT_point_T x;	// Current approximation
+	PT_vector_T x;	// Current approximation
 };
 struct PT_bsf_mapElem_T {		
 	int columnNo;				// Column number in matrix Alpha
+	PT_vector_T column;		// Column of reduced matrix		
 };
 struct PT_bsf_reduceElem_T {		
-	double column[PP_N];		// Column of intermediate matrix		
+	PT_vector_T column;		// Column of intermediate matrix		
 };
 
 struct PT_bsf_reduceElem_T_1 {				
