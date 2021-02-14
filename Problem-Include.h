@@ -7,5 +7,6 @@ This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky
 ==============================================================================*/
 #include <iomanip>
 #include <iostream>
+#include <math.h>
 #include <omp.h>
 

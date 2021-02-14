@@ -15,7 +15,7 @@ struct PT_bsf_parameter_T {
 };
 struct PT_bsf_mapElem_T {		
 	int columnNo;				// Column number in matrix Alpha
-	PT_vector_T column;		// Column of reduced matrix		
+	PT_vector_T column;			// Column of reduced matrix		
 };
 struct PT_bsf_reduceElem_T {		
 	PT_vector_T column;		// Column of intermediate matrix		

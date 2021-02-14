@@ -50,9 +50,10 @@ static void BC_Master() {// The head function of the master process.
 	PC_bsf_ParametersOutput(BD_order.parameter);
 	BD_iterCounter = 0;
 
-	BD_t -= MPI_Wtime();
+	BD_t = -MPI_Wtime();
 	do {
-		/* Time measurement *///cout << endl;
+		PC_bsf_JobDispatcher(&(BD_order.parameter), &BD_newJobCase, &BD_exit);
+		if (BD_exit) break;
 		BD_jobCase = BD_newJobCase;
 		if (BD_jobCase > PP_BSF_MAX_JOB_CASE) {
 			cout << "BC_Master:Error: Job Case = " << BD_jobCase << " > PP_BSF_MAX_JOB_CASE = " << PP_BSF_MAX_JOB_CASE << endl;
@@ -61,7 +62,6 @@ static void BC_Master() {// The head function of the master process.
 		};
 		BC_MasterMap(!BD_EXIT);
 		BC_MasterReduce();
-		/* Time measurement *///double t_p = -MPI_Wtime();
 		switch (BD_jobCase) {
 			case 0:
 			PC_bsf_ProcessResults(
@@ -132,11 +132,9 @@ static void BC_Master() {// The head function of the master process.
 			break;
 		};
 
-		/* Time measurement *///t_p += MPI_Wtime();
-		/* Time measurement *///cout << "t_p = " << t_p << "\t";
-
 		BD_iterCounter++;
 	} while (!BD_exit);
+
 	BD_t += MPI_Wtime();
 
 	BC_MasterMap(BD_EXIT);
@@ -177,7 +175,6 @@ static void BC_MasterMap(bool exit) { // Forms an order and sends it to the work
 	BD_order.jobCase = BD_jobCase;
 	BD_order.iterCounter = BD_iterCounter;
 
-	/* Time measurement *///double t_Send = -MPI_Wtime(), t_s;
 	for (int rank = 0; rank < BD_numOfWorkers; rank++) {
 		MPI_Isend(
 			&BD_order,
@@ -189,10 +186,6 @@ static void BC_MasterMap(bool exit) { // Forms an order and sends it to the work
 			&BD_request[rank]);
 	};
 	MPI_Waitall(BD_numOfWorkers, BD_request, BD_status);
-
-	/* Time measurement *///t_Send += MPI_Wtime();
-	/* Time measurement *///t_s = t_Send / BD_numOfWorkers;
-	/* Time measurement *///cout << "t_s = " << t_s << "\t";
 };
 
 static void BC_MasterReduce() {
@@ -255,7 +248,6 @@ static bool BC_WorkerMap() { // Performs the Map function
 	PC_bsfAssignAddressOffset(BD_offset[BD_rank]);
 	PC_bsfAssignParameter(BD_order.parameter);
 
-	/* Time measurement *///double t_Map = -MPI_Wtime();
 #ifdef PP_BSF_OMP
 #ifdef PP_BSF_NUM_THREADS
 #pragma omp parallel for num_threads(PP_BSF_NUM_THREADS)
@@ -300,7 +292,6 @@ static bool BC_WorkerMap() { // Performs the Map function
 };
 
 static void BC_WorkerReduce() {
-	/* Time measurement *///double t_Reduce = -MPI_Wtime(), t_a;
 
 	switch (BD_order.jobCase) {
 	case 0:
@@ -323,9 +314,6 @@ static void BC_WorkerReduce() {
 		cout << "BC_WorkerReduce Error: Undefined job type!" << endl;
 		break;
 	};
-	/* Time measurement *///t_Reduce += MPI_Wtime();
-	/* Time measurement *///t_a = t_Reduce / BD_sublistSize[BD_rank];
-	/* Time measurement *///cout << "t_a = " << t_a << "\t";
 };
 
 static void BC_ProcessExtendedReduceList(BT_extendedReduceElem_T* reduceList, int length, BT_extendedReduceElem_T** extendedReduceResult_P) {
@@ -495,8 +483,9 @@ static void BC_MpiRun() {
 	MPI_Comm_rank(MPI_COMM_WORLD, &BD_rank);
 	PC_bsfAssignMpiRank(BD_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &BD_size);
-	if (BD_size > PP_MAX_MPI_SIZE) {
-		if (BD_rank == 0) cout << "Error: MPI_SIZE exceeded the maximum allowed value PP_MAX_MPI_SIZE = " << PP_MAX_MPI_SIZE << endl;
+	PC_bsfAssignMpiMaster(BD_size - 1);
+	if (BD_size > PP_BSF_MAX_MPI_SIZE) {
+		if (BD_rank == 0) cout << "Error: MPI_SIZE exceeded the maximum allowed value PP_BSF_MAX_MPI_SIZE = " << PP_BSF_MAX_MPI_SIZE << endl;
 		MPI_Finalize();
 		exit(1);
 	}

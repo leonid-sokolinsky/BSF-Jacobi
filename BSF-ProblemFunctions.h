@@ -1,6 +1,6 @@
 /*==============================================================================
 Project: Bulk Synchronous Farm (BSF)
-Theme: BSF Cimmino
+Theme: BSF Skeleton
 Module: BSF-ProblemFunctions.h (Predefined Problem Function Forwards)
 Author: Leonid B. Sokolinsky
 This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky/BSF-skeleton)
@@ -42,6 +42,11 @@ void PC_bsf_IterOutput_3(
 	double elapsedTime, 
 	int nextJob
 );
+void PC_bsf_JobDispatcher(
+	PT_bsf_parameter_T* parameter,
+	int* job,
+	bool* exit
+);
 void PC_bsf_MapF(
 	PT_bsf_mapElem_T* mapElem, 
 	PT_bsf_reduceElem_T* reduceElem, 
@@ -66,8 +71,8 @@ void PC_bsf_ParametersOutput(
 	PT_bsf_parameter_T parameter
 );
 void PC_bsf_ProblemOutput(
-	PT_bsf_reduceElem_T* reduceResult, 
-	int reduceCounter, 
+	PT_bsf_reduceElem_T* reduceResult,
+	int reduceCounter,
 	PT_bsf_parameter_T parameter,
 	double t
 );
@@ -139,11 +144,10 @@ void PC_bsf_ReduceF_3(
 );
 void PC_bsf_SetListSize(
 	int* listSize
-); 
+);
 void PC_bsf_SetInitParameter(
 	PT_bsf_parameter_T* parameter
 );
-
 void PC_bsf_SetMapListElem(
 	PT_bsf_mapElem_T* elem, 
 	int i

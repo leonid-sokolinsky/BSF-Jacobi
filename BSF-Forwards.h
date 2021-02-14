@@ -11,6 +11,7 @@ This source code is a part of BSF Skeleton (https://github.com/leonid-sokolinsky
 void PC_bsfAssignAddressOffset(int value);
 void PC_bsfAssignIterCounter(int value);
 void PC_bsfAssignJobCase(int value);
+void PC_bsfAssignMpiMaster(int value);
 void PC_bsfAssignMpiRank(int value);
 void PC_bsfAssignNumberInSublist(int value);
 void PC_bsfAssignNumOfWorkers(int value);
